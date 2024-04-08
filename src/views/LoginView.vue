@@ -79,7 +79,7 @@
 import { useThemeStore } from '~/stores/theme.js'
 import { useAuthStore } from '~/stores/authStore.js'
 import ThemeSwitcher from '~/components/ThemeSwitcher/ThemeSwitcher.vue'
-import Icon from '~/components/Icon/Icon.vue' // Import the Icon component
+import Icon from '~/components/Icon/Icon.vue'
 import waveBg from '~/assets/imgs/waveBg.png'
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
