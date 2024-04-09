@@ -25,7 +25,6 @@ const darkTheme = {
   colorBgElevated: '#a1a1aa'
 }
 
-
 const checkToken = () => {
   const token = localStorage.getItem('accessToken')
   if (token && isTokenExpired(token)) {
@@ -34,18 +33,23 @@ const checkToken = () => {
   }
 }
 
+const setLanguage = () => {
+  const language = localStorage.getItem('language')
+  if (!language) {
+    localStorage.setItem('language', 'en')
+  }
+}
+
 onMounted(() => {
   checkToken()
+  setLanguage()
 })
 
 watchEffect(() => {
   const intervalId = setInterval(checkToken, 900000)
   return () => clearInterval(intervalId)
 })
-
 </script>
-
-
 
 <template>
   <a-config-provider

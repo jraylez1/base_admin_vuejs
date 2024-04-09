@@ -95,7 +95,7 @@ const formState = reactive({
 
 const handleLogin = async (values) => {
   await authStore.login(values)
-  router.push('/')
+  router.push('/dashboard')
 }
 </script>
 
