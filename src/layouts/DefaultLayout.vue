@@ -20,22 +20,12 @@
         </div>
       </a-layout-header>
       <div class="mt-6 mx-6">
-        <!-- <a-breadcrumb
-            :items="[
-              {
-                href: '/dashboard',
-                title: <Icon name="home" />
-              },
-              {
-                title: (
-                  <>
-                    <Icon name={pathName} />
-                    <span class="ml-2">{t(pathName)}</span>
-                  </>
-                )
-              }
-            ]"
-          /> -->
+        <a-breadcrumb>
+          <a-breadcrumb-item
+            ><router-link :to="{ name: 'home' }">{{ $t('Dashboard') }}</router-link></a-breadcrumb-item
+          >
+          <a-breadcrumb-item>{{ $t(pathName) }}</a-breadcrumb-item>
+        </a-breadcrumb>
       </div>
       <a-layout-content class="mt-6 mx-4 mb-0">
         <div
@@ -61,10 +51,14 @@ import ThemeSwitcher from '~/components/ThemeSwitcher/ThemeSwitcher.vue'
 import { useRouter } from 'vue-router'
 import MenuDefaultLayout from '../components/LayoutComp/MenuDefaultLayout.vue'
 import AvatarDefaultLayout from '../components/LayoutComp/AvatarDefaultLayout.vue'
+import { computed } from 'vue'
 
 const router = useRouter()
 const themeStore = useThemeStore()
-const pathName = router.currentRoute.value.path.split('/')[1]
+
+const pathName = computed(() => {
+  return router.currentRoute.value.path.split('/')[1]
+})
 </script>
 
 <style lang="scss" scoped></style>

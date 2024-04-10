@@ -17,12 +17,12 @@
       <template #overlay>
         <a-menu @click="handleMenuClick">
           <a-menu-item key="1" @click="changeLanguage('vi')">
-            <a-typography-text type="success" strong>
+            <a-typography-text :type="locale === 'vi' ? 'success' : ''" strong>
               {{ $t('Vietnamese') }}
             </a-typography-text>
           </a-menu-item>
           <a-menu-item key="2" @click="changeLanguage('en')">
-            <a-typography-text strong>
+            <a-typography-text strong :type="locale === 'en' ? 'success' : ''">
               {{ $t('English') }}
             </a-typography-text>
           </a-menu-item>
@@ -59,7 +59,9 @@ import { ref, h } from 'vue'
 import { PoweroffOutlined } from '@ant-design/icons-vue'
 import { useAuthStore } from '~/stores/authStore.js'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
+const { t, locale } = useI18n({ useScope: 'global' })
 const router = useRouter()
 const open = ref(false)
 const authStore = useAuthStore()
@@ -75,9 +77,10 @@ const handleLogout = async () => {
   router.push('/login')
 }
 
-const changeLanguage = (locale) => {
-  this.$i18n.locale = locale
-  localStorage.setItem('language', locale)
+const changeLanguage = (localeValue) => {
+  // locale.value = localeValue
+  localStorage.setItem('language', localeValue)
+  window.location.reload()
 }
 </script>
 
