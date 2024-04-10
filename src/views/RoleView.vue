@@ -81,30 +81,13 @@
       :closable="false"
       destroyOnClose
       :width="1000"
+      :afterClose="handleCancel"
     >
-      <a-form
-        v-model:form="form"
-        name="roleForm"
-        class="flex justify-center items-center flex-col"
-        @Finish="handleOk"
-        autoComplete="off"
-      >
+      <a-form name="roleForm" class="flex justify-center items-center flex-col" autoComplete="off">
         <div class="w-full">
           <a-typography-text class="pb-2">{{ $t('Name') }}</a-typography-text>
-          <a-form-item
-            name="name"
-            :rules="[
-              {
-                required: true,
-                message: $t('Please input your name!')
-              },
-              {
-                type: 'name',
-                message: $t('Name is not valid!')
-              }
-            ]"
-          >
-            <a-input size="large" :placeholder="$t('Name')" class="text-[#333333]">
+          <a-form-item name="name" v-bind="validateInfos.name">
+            <a-input v-model:value="modelRef.name" size="large" :placeholder="$t('Name')" class="text-[#333333]">
               <template #prefix>
                 <Icon name="user" size="1x" />
               </template>
@@ -112,7 +95,7 @@
           </a-form-item>
         </div>
         <div class="w-full">
-          <Text class="">{{ $t('Permissions') }}</Text>
+          <a-typography-text class="">{{ $t('Permissions') }}</a-typography-text>
           <div v-for="permission in permissions" :key="permission.id" class="mb-4">
             <div class="p-4 flex justify-between items-center rounded-lg bg-[#334454]">
               <div class="font-bold text-lg text-white">{{ $t(permission.name) }}</div>
@@ -127,7 +110,7 @@
                 :key="action.id"
                 class="p-4 flex justify-between items-center rounded-lg mt-2 bg-slate-400"
               >
-                <div class="font-bold text-lg text-white">{t(action.name)}</div>
+                <div class="font-bold text-lg text-white">{{ $t(action.name) }}</div>
                 <a-switch
                   v-model:checked="action.isAllow"
                   @Change="(checked) => onChangeAction(checked, permission.id, action.id)"
@@ -138,7 +121,7 @@
         </div>
         <div class="flex gap-2 w-full justify-end">
           <a-form-item class="mb-0">
-            <a-button type="primary" size="large" htmlType="submit" :disabled="checkModalDisable()">
+            <a-button type="primary" size="large" htmlType="submit" :disabled="checkModalDisable()" @click="handleOk">
               {{ $t('Save') }}
             </a-button>
           </a-form-item>
@@ -154,12 +137,12 @@
 <script setup>
 import { useRoleStore } from '~/stores/roleStore.js'
 import Icon from '~/components/Icon/Icon.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { i18n } from '~/plugins/i18nPlugin'
 import { Form } from 'ant-design-vue'
 
-const form = Form.useForm
+const useForm = Form.useForm
 const roleStore = useRoleStore()
 const router = useRouter()
 const pathName = computed(() => {
@@ -171,6 +154,22 @@ const isModalOpen = ref(false)
 const roleId = ref(null)
 const roleName = ref('')
 const permissions = ref([])
+const modelRef = reactive({
+  name: ''
+})
+
+const rulesRef = reactive({
+  name: [
+    {
+      required: true,
+      message: i18n.global.t('Please input your name!')
+    }
+  ]
+})
+
+const { resetFields, validate, validateInfos } = useForm(modelRef, rulesRef, {
+  onValidate: (...args) => console.log(...args)
+})
 
 const columns = [
   {
@@ -213,8 +212,8 @@ const showModal = async (type, record) => {
     roleId.value = record.id
     roleName.value = record.name
     const detailRole = await roleStore.getDetailRole(record.id)
-    form.setFieldsValue(detailRole)
     permissions.value = detailRole.permissions
+    modelRef.name = detailRole.name
   } else {
     const detailRole = await roleStore.getPermissions()
     permissions.value = detailRole.permissions
@@ -222,8 +221,8 @@ const showModal = async (type, record) => {
 }
 
 const checkModalDisable = () => {
-  if (modalType === 'update') {
-    if (roleName === 'admin' || roleName === 'user') {
+  if (modalType.value === 'update') {
+    if (roleName.value === 'admin' || roleName.value === 'user') {
       return true
     }
   } else {
@@ -232,41 +231,87 @@ const checkModalDisable = () => {
 }
 
 const handleOk = async () => {
-    form
-      .validateFields()
-      .then((values) => {
-        const { name } = values
-        const valuesWithPermissions = {
-          name,
-          permissions: permissions
-        }
+  validate()
+    .then(async (values) => {
+      const { name } = values
+      const valuesWithPermissions = {
+        name,
+        permissions: permissions.value
+      }
 
-        if (modalType === 'add') {
-          const response = await roleStore.createRole(valuesWithPermissions)
-          if (response) {
-                isModalOpen.value = false
-                roleStore.getRoles()
-              }
-        } else {
-          const response = await roleStore.updateRole({ id: roleId, credentials: valuesWithPermissions })
-          if (response) {
-                isModalOpen.value = false
-                roleStore.getRoles()
-              }
-          dispatch(updateRole())
-            .unwrap()
-            .then((response) => {
-              if (response) {
-                setIsModalOpen(false)
-                dispatch(getRoles())
-              }
-            })
+      if (modalType.value === 'add') {
+        const response = await roleStore.createRole(valuesWithPermissions)
+        if (response) {
+          handleCancel()
+          roleStore.getRoles()
         }
-      })
-      .catch((errorInfo) => {
-        console.log('Validation Failed:', errorInfo)
-      })
+      } else {
+        const response = await roleStore.updateRole({ id: roleId.value, credentials: valuesWithPermissions })
+        if (response) {
+          handleCancel()
+          roleStore.getRoles()
+        }
+      }
+    })
+    .catch((errorInfo) => {
+      console.log('Validation Failed:', errorInfo)
+    })
+}
+
+const handleCancel = () => {
+  isModalOpen.value = false
+  permissions.value = []
+  resetFields()
+}
+
+const deleteItem = async (id) => {
+  const response = await roleStore.deleteRole(id)
+  if (response) {
+    roleStore.getRoles()
   }
+}
+
+const deleteManyItem = async (ids) => {
+  const response = await roleStore.deleteManyRole(ids)
+  if (response) {
+    roleStore.getRoles()
+  }
+}
+
+const onChangePermission = (checked, id) => {
+  const updatedPermissions = permissions.value.map((permission) => {
+    if (permission.id === id) {
+      let updatedActions = permission.actions
+      // Kiểm tra nếu checked là false và mảng actions có nhiều hơn một phần tử
+      if (!checked && permission.actions.length > 1) {
+        updatedActions = permission.actions.map((action) => ({
+          ...action,
+          isAllow: false
+        }))
+      }
+      return { ...permission, isAllow: checked, actions: updatedActions }
+    }
+    return permission
+  })
+
+  permissions.value = updatedPermissions
+}
+const onChangeAction = (checked, permissionId, actionId) => {
+  const updatedPermissions = permissions.value.map((permission) => {
+    if (permission.id === permissionId) {
+      const updatedActions = permission.actions.map((action) => {
+        if (action.id === actionId) {
+          return { ...action, isAllow: checked }
+        }
+        return action
+      })
+      return { ...permission, actions: updatedActions }
+    }
+    return permission
+  })
+
+  permissions.value = updatedPermissions
+}
 
 const onSearch = (value) => {
   roleStore.getRoles(value)

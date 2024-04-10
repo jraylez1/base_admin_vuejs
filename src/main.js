@@ -9,4 +9,4 @@ import 'ant-design-vue/dist/reset.css'
 import './assets/css/tailwind.css'
 import './assets/css/main.css'
 
-createApp(App).use(router).use(Antd).use(i18n).use(piniaPlugin).mount('#app')
+createApp(App).use(piniaPlugin).use(router).use(Antd).use(i18n).mount('#app')

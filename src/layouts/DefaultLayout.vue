@@ -1,6 +1,6 @@
 <template>
   <a-layout class="min-h-screen">
-    <a-layout-sider breakpoint="lg" collapsedWidth="0" class="z-[9999] fixed top-0 left-0 bottom-0" theme="dark">
+    <a-layout-sider breakpoint="lg" collapsedWidth="0" class="z-[999] fixed top-0 left-0 bottom-0" theme="dark">
       <div class="p-4">
         <div class="text-white text-center p-2 font-bold text-xl bg-[#334454] rounded-md">Admin page</div>
       </div>

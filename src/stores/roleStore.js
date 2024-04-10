@@ -21,7 +21,7 @@ export const useRoleStore = defineStore('role-store', {
     showNotification(message, type = 'success') {
       notification[type]({
         message: i18n.global.t('Notification'),
-        description: t(message),
+        description: i18n.global.t(message),
         duration: type === 'success' ? 2 : 3
       })
     },

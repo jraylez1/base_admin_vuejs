@@ -27,14 +27,14 @@
     <br />
     <div class="my-2">
       <a-typography-text class="text-lg font-medium">
-        Use the command: <Text class="text-2xl font-bold">Yarn dev</Text>
+        Use the command: <a-typography-text class="text-2xl font-bold">Yarn dev</a-typography-text>
       </a-typography-text>
     </div>
     <a-typography-text class="text-2xl font-bold gradient-text-red">How about building this project?</a-typography-text>
     <br />
     <div class="my-2">
       <a-typography-text class="text-lg font-medium">
-        Use the command: <Text class="text-2xl font-bold">Yarn build</Text>
+        Use the command: <a-typography-text class="text-2xl font-bold">Yarn build</a-typography-text>
       </a-typography-text>
     </div>
   </div>
