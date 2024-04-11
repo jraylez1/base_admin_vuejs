@@ -82,5 +82,12 @@
   "Delete role success": "Delete role success",
   "Delete list role success": "Delete list role success",
   "Are you sure to delete this role?": "Are you sure to delete this role?",
-  "Delete role": "Delete role"
+  "Delete role": "Delete role",
+  "The phone number must have 10 digits!": "The phone number must have 10 digits!",
+  "input role name": "input role name",
+  "Please input your phone!": "Please input your phone!",
+  "Please input your role!": "Please input your role!",
+  "Please input your confirm!": "Please input your confirm!",
+  "Email": "Email",
+  "select your role": "select your role"
 }

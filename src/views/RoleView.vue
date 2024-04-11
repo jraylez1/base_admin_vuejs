@@ -2,7 +2,7 @@
   <div>
     <div class="flex sm:flex-row flex-col justify-between items-center">
       <div class="flex gap-2 sm:w-auto w-full">
-        <a-button type="primary" size="large" @Click="() => showModal('add')">
+        <a-button type="primary" size="large" @Click="showModal('add')">
           <template #icon>
             <Icon name="circlePlus" class="text-white mr-2" />
           </template>
@@ -11,10 +11,11 @@
         <a-popconfirm
           :title="$t(`Delete ${pathName}`)"
           :description="$t(`Are you sure to delete this ${pathName}?`)"
-          @confirm="() => deleteManyItem(selectItemToDelete)"
+          @confirm="deleteManyItem(selectItemToDelete)"
           :okText="$t('Yes')"
           :cancelText="$t('No')"
           :disabled="selectItemToDelete.length > 0 ? false : true"
+          placement="bottom"
         >
           <a-button type="primary" size="large" danger :disabled="selectItemToDelete.length > 0 ? false : true">
             <template #icon>
@@ -29,7 +30,7 @@
         </a-popconfirm>
       </div>
       <div class="sm:mt-0 mt-4 sm:w-auto w-full">
-        <a-input-search :placeholder="$t('input user email / phone')" @Search="onSearch" enterButton />
+        <a-input-search :placeholder="$t('input role name')" @Search="onSearch" enterButton />
       </div>
     </div>
     <div class="mt-8">
@@ -49,7 +50,7 @@
           </template>
           <template v-if="column.key === 'action'">
             <a-space>
-              <a-button @Click="() => showModal('update', record)">
+              <a-button @Click="showModal('update', record)">
                 <template #icon>
                   <Icon name="update" />
                 </template>
@@ -58,13 +59,14 @@
               <a-popconfirm
                 :title="$t(`Delete ${pathName}`)"
                 :description="$t(`Are you sure to delete this ${pathName}?`)"
-                @confirm="() => deleteItem(record.id)"
+                @confirm="deleteItem(record.id)"
                 :okText="$t('Yes')"
                 :cancelText="$t('No')"
+                :disabled="record.name === 'admin' || record.name === 'user'"
               >
                 <a-button danger :disabled="record.name === 'admin' || record.name === 'user'">
                   <template #icon>
-                    <Icon name="update" />
+                    <Icon name="trash" />
                   </template>
                   {{ $t('Delete') }}
                 </a-button>
@@ -83,11 +85,11 @@
       :width="1000"
       :afterClose="handleCancel"
     >
-      <a-form name="roleForm" class="flex justify-center items-center flex-col" autoComplete="off">
+      <a-form name="roleForm" class="flex justify-center items-center flex-col" autoComplete="off" :model="formState">
         <div class="w-full">
           <a-typography-text class="pb-2">{{ $t('Name') }}</a-typography-text>
           <a-form-item name="name" v-bind="validateInfos.name">
-            <a-input v-model:value="modelRef.name" size="large" :placeholder="$t('Name')" class="text-[#333333]">
+            <a-input v-model:value="formState.name" size="large" :placeholder="$t('Name')" class="text-[#333333]">
               <template #prefix>
                 <Icon name="user" size="1x" />
               </template>
@@ -139,9 +141,10 @@ import { useRoleStore } from '~/stores/roleStore.js'
 import Icon from '~/components/Icon/Icon.vue'
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { i18n } from '~/plugins/i18nPlugin'
 import { Form } from 'ant-design-vue'
+import { useI18n } from 'vue-i18n'
 
+const { t, locale } = useI18n({ useScope: 'global' })
 const useForm = Form.useForm
 const roleStore = useRoleStore()
 const router = useRouter()
@@ -154,7 +157,7 @@ const isModalOpen = ref(false)
 const roleId = ref(null)
 const roleName = ref('')
 const permissions = ref([])
-const modelRef = reactive({
+const formState = reactive({
   name: ''
 })
 
@@ -162,36 +165,35 @@ const rulesRef = reactive({
   name: [
     {
       required: true,
-      message: i18n.global.t('Please input your name!')
+      message: t('Please input your name!')
     }
   ]
 })
 
-const { resetFields, validate, validateInfos } = useForm(modelRef, rulesRef, {
+const { resetFields, validate, validateInfos } = useForm(formState, rulesRef, {
   onValidate: (...args) => console.log(...args)
 })
 
 const columns = [
   {
-    title: i18n.global.t('Ordinal'),
+    title: t('Ordinal'),
     key: 'ordinal',
     rowScope: 'row',
     align: 'center',
     width: 100
   },
   {
-    title: i18n.global.t('Action'),
+    title: t('Action'),
     key: 'action',
     align: 'center',
     width: 400
   },
   {
-    title: i18n.global.t('Name'),
+    title: t('Name'),
     dataIndex: 'name',
     align: 'center',
     key: 'name',
-    sorter: (a, b) => a.name.length - b.name.length,
-    responsive: ['md']
+    sorter: (a, b) => a.name.length - b.name.length
   }
 ]
 
@@ -205,6 +207,11 @@ const rowSelection = {
   })
 }
 
+const setValueUpdate = (detailValue) => {
+  permissions.value = detailValue.permissions
+  formState.name = detailValue.name
+}
+
 const showModal = async (type, record) => {
   modalType.value = type
   isModalOpen.value = true
@@ -212,8 +219,7 @@ const showModal = async (type, record) => {
     roleId.value = record.id
     roleName.value = record.name
     const detailRole = await roleStore.getDetailRole(record.id)
-    permissions.value = detailRole.permissions
-    modelRef.name = detailRole.name
+    setValueUpdate(detailRole)
   } else {
     const detailRole = await roleStore.getPermissions()
     permissions.value = detailRole.permissions
@@ -274,6 +280,7 @@ const deleteItem = async (id) => {
 const deleteManyItem = async (ids) => {
   const response = await roleStore.deleteManyRole(ids)
   if (response) {
+    selectItemToDelete.value = []
     roleStore.getRoles()
   }
 }

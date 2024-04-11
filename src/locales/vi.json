@@ -83,5 +83,12 @@
   "Delete role success": "Xóa quyền thành công",
   "Delete list role success": "Xóa danh sách quyền thành công",
   "Are you sure to delete this role?": "Bạn có thực sự muốn xóa quyền này?",
-  "Delete role": "Xóa quyền"
+  "Delete role": "Xóa quyền",
+  "The phone number must have 10 digits!": "Số điện thoại cần phải có 10 chữ số!",
+  "input role name": "Nhập tên quyền",
+  "Please input your phone!": "vui lòng nhập số điện thoại!",
+  "Please input your role!": "Vui lòng nhập quyền!",
+  "Please input your confirm!": "Vui lòng nhập mật khẩu!",
+  "Email": "Email",
+  "select your role": "Chọn quyền"
 }
